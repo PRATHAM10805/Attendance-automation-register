@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production
+dist/
+build/
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables (CRITICAL: Do NOT push .env to GitHub)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Databases
+dump.json
+dump.txt
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
