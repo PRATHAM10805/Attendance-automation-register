@@ -60,5 +60,3 @@ This will start both the backend server and the frontend client simultaneously.
 ## 🖨️ Printing
 Use the **Print** button in the top-right of the application to generate a clean PDF or physical printout.
 
-## 📄 License
-MIT
