@@ -3,9 +3,15 @@ import Header from './components/Header';
 import AttendanceTab from './components/AttendanceTab';
 import MarksTab from './components/MarksTab';
 import AddStudentModal from './components/AddStudentModal';
+import Login from './components/Login';
 import { getStudents, addStudent } from './api/students';
 
 export default function App() {
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('staff_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [token, setToken] = useState(localStorage.getItem('staff_token'));
   const [students, setStudents] = useState([]);
   const [tab, setTab] = useState('attendance');
   const [sheetLocked, setSheetLocked] = useState(false);
@@ -13,19 +19,51 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Fetch students on mount
+  // 1. On mount, fetch students if token exists
   useEffect(() => {
-    getStudents()
-      .then(res => setStudents(res.data))
-      .catch(() => setError('Cannot connect to server. Is MongoDB + backend running?'))
-      .finally(() => setLoading(false));
-  }, []);
+    if (token) {
+      fetchStudents();
+    } else {
+      setLoading(false);
+    }
+  }, [token]);
+
+  const fetchStudents = async () => {
+    setLoading(true);
+    try {
+      const res = await getStudents();
+      setStudents(res.data);
+    } catch (err) {
+      setError('Cannot connect to server. Is MongoDB + backend running?');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = (data) => {
+    localStorage.setItem('staff_token', data.token);
+    localStorage.setItem('staff_user', JSON.stringify(data.staff));
+    setToken(data.token);
+    setUser(data.staff);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('staff_token');
+    localStorage.removeItem('staff_user');
+    setToken(null);
+    setUser(null);
+    setStudents([]);
+  };
 
   const handleAddStudent = async ({ usn, name }) => {
     const { data } = await addStudent({ usn, name });
     setStudents(prev => [...prev, data]);
     setShowModal(false);
   };
+
+  if (!token) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   return (
     <>
@@ -46,8 +84,13 @@ export default function App() {
           </button>
         </div>
         <div className="toolbar-right">
-          <span className="stats-pill">Students: {students.length} | Days: 7</span>
+          <span className="stats-pill">
+            👤 {user?.name || 'Staff'} | Students: {students.length} | Days: 7
+          </span>
           <button className="btn btn-outline" onClick={() => window.print()}>🖨️ Print</button>
+          <button className="btn btn-danger btn-logout" onClick={handleLogout} style={{ marginLeft: '10px' }}>
+            Logout
+          </button>
         </div>
       </div>
 
